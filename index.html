@@ -14,15 +14,63 @@
             font-family: sans-serif; 
             min-height: 100vh;
             display: flex;
-            flex-direction: column; /* 改为纵向，方便统计信息挂在最下面 */
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             margin: 0;
+            /* 防止手机端橡皮筋回弹效果干扰 */
+            overscroll-behavior-y: none;
         }
-        .card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border-radius: 20px; }
-        .option-btn { transition: all 0.2s; border: 1px solid #E9EDC9; }
-        .option-btn:hover { background-color: #CCD5AE; transform: translateY(-2px); }
-        .justify-text { text-align: justify; text-justify: inter-character; }
+
+        .card { 
+            background: rgba(255, 255, 255, 0.8); 
+            backdrop-filter: blur(10px); 
+            border-radius: 20px; 
+        }
+
+        /* 基础按钮样式 */
+        .option-btn { 
+            transition: all 0.2s; 
+            border: 1px solid #E9EDC9; 
+            /* 关键：去掉手机端点击时的默认高亮颜色 */
+            -webkit-tap-highlight-color: transparent;
+            /* 去掉选中时的外边框 */
+            outline: none !important;
+            /* 防止长按弹出菜单干扰 */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+        }
+
+        /* 只有在支持鼠标悬停的设备（电脑）上才显示 hover 效果 */
+        @media (hover: hover) {
+            .option-btn:hover { 
+                background-color: #CCD5AE; 
+                transform: translateY(-2px); 
+            }
+        }
+
+        /* 手机端点击时的瞬间反馈（按下时变色，松开即消失） */
+        .option-btn:active {
+            background-color: #CCD5AE;
+            transform: scale(0.98);
+        }
+
+        .justify-text { 
+            text-align: justify; 
+            text-justify: inter-character; 
+        }
+
+        /* 修复支付说明框的样式 */
+        .pay-notice {
+            background-color: #f8fafc;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 11px;
+            line-height: 1.6;
+            color: #64748b;
+            text-align: left;
+            margin-bottom: 24px;
+        }
     </style>
 </head>
 <body class="p-4">
