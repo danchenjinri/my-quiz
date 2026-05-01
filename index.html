@@ -162,7 +162,7 @@ function showQuestion() {
     // 2. 强制滚动回顶部，确保新题目在视口正中
     window.scrollTo(0, 0);
 
-    q.o.forEach(opt => {
+   q.o.forEach(opt => {
         const btn = document.createElement('button');
         
         // --- 关键修改点 ---
@@ -183,6 +183,7 @@ function showQuestion() {
         container.appendChild(btn);
     });
 }
+
 
         // 1. 这一行放在所有函数的外面（建议放在 let currentStep = 0; 下方）
         let isProcessing = false; 
