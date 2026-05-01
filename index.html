@@ -184,7 +184,7 @@
             showQuestion();
         }
 
-    function showQuestion() {
+function showQuestion() {
     const q = questions[currentStep];
     
     // 更新进度和题目文本
@@ -193,24 +193,27 @@
     
     const container = document.getElementById('options-container');
     
-    // 1. 重要：在生成新按钮前，先彻底清空容器，并让容器“失焦”
+    // 1. 清空旧按钮
     container.innerHTML = '';
     
-    // 2. 强制页面滚动到顶部（防止手机端因为位移产生的视觉偏差）
+    // 2. 强制滚动回顶部，确保新题目在视口正中
     window.scrollTo(0, 0);
 
     q.o.forEach(opt => {
         const btn = document.createElement('button');
         
-        // 这里的 class 加入了 'appearance-none' 和 'select-none' 来消除系统默认样式
-        btn.className = 'option-btn w-full text-left p-4 rounded-xl text-sm bg-white hover:bg-emerald-50 active:bg-emerald-100 outline-none select-none';
+        // --- 关键修改点 ---
+        // 删掉了 hover:bg-emerald-50 和 active:bg-emerald-100
+        // 只保留基础布局类名，具体的颜色和点击反馈交给 CSS 中的 .option-btn 处理
+        btn.className = 'option-btn w-full text-left p-4 rounded-xl text-sm bg-white';
         
-        // 关键点：将按钮的初始状态设为未选中，并移除焦点
         btn.innerText = opt.l;
         
         btn.onclick = (e) => {
-            // 点击的一瞬间，让按钮立刻失去焦点，防止状态带入下一题
-            e.target.blur();
+            // 立即让当前点击的按钮失去焦点，防止状态污染
+            if (e.currentTarget) e.currentTarget.blur();
+            
+            // 执行选择逻辑
             selectOption(opt.v);
         };
         
