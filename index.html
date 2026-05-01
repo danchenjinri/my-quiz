@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>元能力拆解测验</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 强制 body 撑满全屏并垂直居中 */
+        body { 
+            background-color: #FAF9F6; 
+            color: #334433; 
+            font-family: sans-serif; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column; /* 改为纵向，方便统计信息挂在最下面 */
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        .card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border-radius: 20px; }
+        .option-btn { transition: all 0.2s; border: 1px solid #E9EDC9; }
+        .option-btn:hover { background-color: #CCD5AE; transform: translateY(-2px); }
+        .justify-text { text-align: justify; text-justify: inter-character; }
+    </style>
+</head>
+<body class="p-4">
+
+    <!-- 主容器 -->
+
+    <div id="app" class="max-w-md w-full p-8 card shadow-sm mx-auto relative">
+        <!-- 1. 开始页 -->
+        <div id="start-page" class="text-center">
+            <!-- 补回了标题 -->
+            <h1 class="text-2xl font-bold mb-2 text-emerald-900">元能力拆解测验</h1>
+<p class="text-xs text-emerald-700/60 mb-6 font-medium tracking-widest">Produced by 公众号：诞辰今日</p>
+            
+            <!-- 你的两端对齐文案 -->
+            <div class="text-emerald-900/80 text-sm leading-relaxed mb-10" style="text-align: justify; text-justify: inter-character;">
+                <p class="mb-4">
+                    请把这个测试看作是一组自省的支点。任何题目都无法定义一个生动的人。如果你觉得做选择题太过于绝对，那么恰好说明你本身就是一个无法被归类的人。
+                </p>
+                <p>
+                    它能给出的不是结论，不是要告诉你“你是谁”，而是通过这几个具体的现实场景，帮你把那些藏在习惯里的能力零件拎出来瞧瞧。
+                </p>
+            </div>
+
+            <button onclick="startQuiz()" class="bg-emerald-800 text-white px-10 py-3 rounded-full hover:bg-emerald-700 shadow-md transition-all">
+                开始探索
+            </button>
+        </div>
+
+        <!-- 2. 答题页 -->
+        <div id="quiz-page" class="hidden">
+            <div class="mb-4 text-xs text-emerald-700 font-mono" id="progress">1 / 9</div>
+            <h2 class="text-lg font-medium mb-6 leading-snug" id="question-text">加载中...</h2>
+            <div id="options-container" class="space-y-3">
+                <!-- 选项会动态生成 -->
+            </div>
+        </div>
+
+<!-- 3. 结果页 -->
+<div id="result-page" class="hidden text-center">
+    <h2 class="text-xl font-bold mb-4 text-emerald-900">你的元能力坐标图谱</h2>
+    <canvas id="radarChart" class="mb-6"></canvas>
+    
+    <div id="analysis-text" class="text-sm text-left text-gray-700 mb-8 p-4 bg-white/50 rounded-lg justify-text">
+        <!-- 这里会自动填充基础分析 -->
+    </div>
+    
+    <!-- 这里是支付触发区域 -->
+    <div id="pay-section" class="border-t pt-6">
+        <p class="text-xs text-gray-500 mb-4">以上为基础元能力分析。深度报告包含内耗点诊断及整合建议。</p>
+        
+        <!-- 修改了这里：onclick 指向了显示遮罩的函数 -->
+        <button onclick="showPayOverlay()" class="w-full bg-emerald-900 text-white py-4 rounded-xl font-bold shadow-lg">
+            支付 9.9 元解锁深度报告
+        </button>
+    </div>
+</div>
+
+<!-- 方案三：全屏支付遮罩层 -->
+<div id="pay-overlay" class="hidden fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-6">
+    <div class="bg-white p-6 rounded-3xl text-center max-w-xs w-full shadow-2xl">
+        <p class="text-emerald-900 font-bold mb-2">✦ 深度报告解锁 ✦</p>
+        <p class="text-[10px] text-gray-400 mb-4">智慧的交换需要能量的对等</p>
+        
+        <!-- 你的收款码图片 -->
+        <img src="pay-code.jpg" class="w-48 h-48 mx-auto rounded-lg mb-4 object-cover border border-gray-100">
+        
+        <p class="text-[11px] text-gray-500 mb-6 leading-relaxed">长按识别上方二维码支付 9.9 元<br>完成后点击下方按钮开启能量交换</p>
+        
+        <button onclick="unlockReport()" class="w-full bg-emerald-900 text-white py-3 rounded-xl font-bold mb-3">
+            我已支付，开启解锁
+        </button>
+        <button onclick="hidePayOverlay()" class="text-xs text-gray-400 underline">先返回</button>
+    </div>
+</div>
+    <script>
+        const questions = [
+            { t: "当你面对一个完全陌生的新项目时，你下意识的第一个动作是：", 
+              o: [{l: "立刻搜集海量资料、研报进行深度阅读", v: "logic"}, {l: "找懂行的朋友大量沟通，听取内行意见", v: "perception"}, {l: "动手开始试错，在反馈中修正", v: "action"}, {l: "先找一个市面上的成功案例，拆解其背后的运行逻辑", v: "bridge"}]},
+            { t: "在一个热闹的聚会里，你最容易注意到的是：", 
+              o: [{l: "大家讨论的话题里逻辑不对劲或自相矛盾的地方", v: "logic"}, {l: "某个角落里的人情绪低落，或者整体气压的变化", v: "perception"}, {l: "聚会场所的动线安排、灯光色彩或者服务细节", v: "perception"}, {l: "谁和谁聊得最投机，谁是全场的资源连接点", v: "system"}]},
+            { t: "你感到自己的灵感最旺盛的时候，通常是：", 
+              o: [{l: "独自安静思考，将碎片连接成体系的瞬间", v: "logic"}, {l: "与人激烈讨论，在对话中被对方激发出的奇思妙想", v: "bridge"}, {l: "观察生活细节，从一些具体的意象中产生感悟", v: "perception"}, {l: "突然想通了如何把手头的零散资源串联成一个大计划", v: "system"}]},
+            { t: "遇到一个极其复杂的问题（如：策划一场爆火的市集），你的大脑处理流程是：", 
+              o: [{l: "“啪”地一下，脑子里直接浮现出一个完整的画面或模型", v: "perception"}, {l: "需要找张纸或者用电脑，一点点列出 1、2、3、4 的步骤", v: "logic"}, {l: "先跟别人说一遍，在“说”的过程中慢慢把事想清楚", v: "bridge"}, {l: "先评估手里的资源和筹码，看如何拆解给不同的人", v: "system"}]},
+            { t: "面对一件让你很有压力的任务，你如何开启它？", 
+              o: [{l: "建立一个完美的文件夹和计划表，准备好所有工具", v: "logic"}, {l: "先找一个最有趣的小点切入，不管其他的", v: "perception"}, {l: "倒计时到最后一刻，靠DDL带来的强压力直接出结果", v: "action"}, {l: "找一个有经验的模版或借鉴对象，先快速搭个框架出来", v: "bridge"}]},
+            { t: "以下让你最享受的心流状态是：", 
+              o: [{l: "把一堆乱七八糟的资料理得清清楚楚、井井有条", v: "logic"}, {l: "创作出一份极具美感、氛围感的内容", v: "perception"}, {l: "发现了一个别人没看出来的秘密逻辑或关联", v: "logic"}, {l: "让一个卡死很久的项目顺滑跑通", v: "system"}]},
+            { t: "朋友找你帮忙，最常见的理由是：", 
+              o: [{l: "“你帮我分析一下，这事儿到底该怎么办？” ", v: "logic"}, {l: "“我现在心里很难受，想找你聊聊。”", v: "perception"}, {l: "“你审美比较好，帮我看看这个好不好看？”", v: "perception"}, {l: "“你帮我把这堆乱糟糟的想法理一理，讲给别人听。” ", v: "bridge"}]},
+            { t: "在工作中，你最无法忍受的事情是：", 
+              o: [{l: "逻辑混乱、效率极低、浪费时间", v: "logic"}, {l: "氛围压抑、不尊重个人情感、太冷冰冰", v: "perception"}, {l: "毫无美感、内容平庸、人云亦云", v: "perception"}, {l: "沟通成本高，大家各说各的", v: "bridge"}]},
+            { t: "如果你赚到一笔让你“很爽”的钱，通常是因为：", 
+              o: [{l: "你帮别人解决了一个困扰已久的难题", v: "logic"}, {l: "你创作出了一个你非常满意的作品", v: "perception"}, {l: "你成功整合了多方资源，让一件事落地了", v: "system"}, {l: "你发现了一个信息差，并成功完成了中间的转化", v: "bridge"}]}
+        ];
+
+        let currentStep = 0;
+        let scores = { logic: 0, perception: 0, action: 0, bridge: 0, system: 0 };
+        const counts = { logic: 7, perception: 8, action: 3, bridge: 7, system: 6 }; // 映射出现的次数
+
+        function startQuiz() {
+            document.getElementById('start-page').classList.add('hidden');
+            document.getElementById('quiz-page').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = questions[currentStep];
+            document.getElementById('progress').innerText = `${currentStep + 1} / 9`;
+            document.getElementById('question-text').innerText = q.t;
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            q.o.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full text-left p-4 rounded-xl text-sm bg-white hover:shadow-md';
+                btn.innerText = opt.l;
+                btn.onclick = () => selectOption(opt.v);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectOption(val) {
+            scores[val]++;
+            currentStep++;
+            if (currentStep < questions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            document.getElementById('quiz-page').classList.add('hidden');
+            document.getElementById('result-page').classList.remove('hidden');
+
+            const labels = ['逻辑', '感知', '推动', '翻译', '统筹'];
+            const dataValues = [
+    Math.round((scores.logic / counts.logic) * 80) + 20,
+    Math.round((scores.perception / counts.perception) * 80) + 20,
+    Math.round((scores.action / counts.action) * 80) + 20,
+    Math.round((scores.bridge / counts.bridge) * 80) + 20,
+    Math.round((scores.system / counts.system) * 80) + 20
+];
+
+            // 绘制雷达图
+            const ctx = document.getElementById('radarChart');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '能量强度',
+                        data: dataValues,
+                        backgroundColor: 'rgba(109, 121, 91, 0.2)',
+                        borderColor: 'rgba(109, 121, 91, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(109, 121, 91, 1)'
+                    }]
+                },
+                options: { 
+                    scales: { r: { min: 0, max: 100, ticks: { display: false } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // 简单分析
+            let maxKey = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+            const intros = {
+                logic: "你拥有极强的系统构建能力，擅长在混乱中抓取秩序。",
+                perception: "你的感官天线极度灵敏，能捕捉到环境中微妙的审美与情感需求。",
+                action: "你是一个纯粹的执行者，擅长通过肉身冲撞现实来获取结果。",
+                bridge: "你是天生的翻译官，擅长将复杂的认知转化为易懂的语言或模板。",
+                system: "你是出色的操盘手，能看清资源位并把它们组合成更大的系统。"
+            };
+            // 找到这行并替换
+document.getElementById('analysis-text').innerHTML = intros[maxKey] + "<br><br><span class='opacity-60 text-[12px]'>支付后查看更详细的能力配比报告。</span>";
+        }
+        function showPayOverlay() { document.getElementById('pay-overlay').classList.remove('hidden'); }
+        function hidePayOverlay() { document.getElementById('pay-overlay').classList.add('hidden'); }
+        function unlockReport() {
+
+const btn = event.target;
+
+btn.innerText = "能量核验中...";
+
+btn.disabled = true;
+
+
+
+setTimeout(() => {
+
+    hidePayOverlay();
+
+    let maxKey = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+
+    const deepTexts = {
+
+        logic: { title: "秩序的编织者", content: "你天然拥有一双能够穿透混乱、看到结构的眼睛。你能剔除情绪干扰，直抵底层逻辑。但你往往因为等待那个完美的答案而错过了起跑的时机，别让逻辑成为你回避现实的盾牌。", advice: "寻找强力的“推动型”搭档，将你的逻辑图纸直接交由他们去撞击现实。" },
+
+        perception: { title: "灵敏的场域捕捉者", content: "你是一个行走的高频信号收发器。你的认知来自对环境的深度感应。这种天赋让你在创意和沟通中拥有上帝视角。但因为你的边界较薄，所以容易受环境影响。", advice: "你需要高频次地更换环境或进入大自然，以清理感官积压的负荷。" },
+
+        action: { title: "现实的破壁者", content: "你拥有通过“身体力行”来撞击现实、获取反馈的原始生命力。你是那种能把死局撞开一条缝的人。也因此，你害怕“空转”，如果没有清晰的指引，你会因为盲目冲锋而陷入间歇性虚脱。", advice: "在行动前，强制自己与“逻辑型”或“统筹型”沟通。" },
+
+        bridge: { title: "跨界的认知转译员", content: "你拥有极罕见的转译天赋，擅长将高维认知降维成可执行的语言。你是天生的连接桥梁。但也许因为太擅长翻译他人，你容易忽略自己的主体性。", advice: "尝试将你的转译能力“产品化”（如课程、咨询、手册），而不是作为随叫随到的沟通工具。" },
+
+        system: { title: "资源位势的操盘手", content: "你看到的不是单个的“点”，而是由点连成的“线”与“面”。你擅长把自己的能力摆在对的位置来撬动杠杆。但是当你手中没有筹码时你会极度焦虑。", advice: "不用试图精进每一项能力细节，你需要整合组装的是一套“信任网络”。" }
+
+    };
+
+    const myReport = deepTexts[maxKey];
+
+    const reportHTML = `
+
+    <div class="mt-6 p-6 bg-[#FDFCF8] rounded-2xl border border-[#E5E2D9] animate-fadeIn text-left shadow-sm">
+
+        <h3 class="font-bold text-emerald-900 mb-3 text-lg">✦ 深度透视：${myReport.title}</h3>
+
+        <p class="text-sm leading-relaxed text-gray-700 mb-6 justify-text">${myReport.content}</p>
+
+        <div class="p-5 bg-white rounded-xl border border-[#EEECE4]">
+
+            <p class="text-[11px] font-bold text-emerald-900 mb-2 uppercase tracking-widest">🔧 能力整合建议 / Component Advice</p>
+
+            <p class="text-[12px] leading-relaxed text-gray-600 justify-text">${myReport.advice}</p>
+
+        </div>
+
+        <div class="pt-6 mt-6 border-t border-[#E5E2D9]">
+
+            <p class="text-[11px] text-gray-400 italic">“任何模型都是为了被打破。当你意识到自己的元能力零件状态时，你才真正获得了整合人生方向的主权：）”</p>
+
+        </div>
+
+        <p class="mt-6 text-[10px] text-center text-gray-400">
+
+            关注公众号：诞辰今日，探索更多能量实验。<br>若想要进行更具体的职业/生活流向分析，可预约1v1深度解读，请添加 stayfree11。
+
+        </p>
+
+    </div>`;
+
+    document.getElementById('analysis-text').innerHTML += reportHTML;
+
+    document.getElementById('pay-section').style.display = 'none';
+
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
+}, 1500);
+
+}
+    </script>
+    <!-- 不蒜子统计脚本：一定要放在 body 结束前 -->
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- 统计显示区域：放在 app 容器外面，确保它在页面最底部居中 -->
+    <div class="w-full flex justify-center items-center py-10 opacity-30">
+        <p class="text-[10px] tracking-[0.2em] text-gray-400 font-light">
+            已有 <span id="busuanzi_value_site_pv" class="font-mono">...</span> 位朋友曾在此停留
+        </p>
+    </div>
+
+</body>
+</html>
