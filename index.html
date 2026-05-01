@@ -6,72 +6,72 @@
     <title>元能力拆解测验</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* 强制 body 撑满全屏并垂直居中 */
-        body { 
-            background-color: #FAF9F6; 
-            color: #334433; 
-            font-family: sans-serif; 
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            /* 防止手机端橡皮筋回弹效果干扰 */
-            overscroll-behavior-y: none;
-        }
+   <style>
+    /* 1. 页面整体布局：强制 body 撑满全屏并垂直居中 */
+    body { 
+        background-color: #FAF9F6; 
+        color: #334433; 
+        font-family: sans-serif; 
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column; /* 纵向排列 */
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        overscroll-behavior-y: none; /* 防止手机端橡皮筋回弹 */
+    }
 
-        .card { 
-            background: rgba(255, 255, 255, 0.8); 
-            backdrop-filter: blur(10px); 
-            border-radius: 20px; 
-        }
+    /* 2. 卡片样式：毛玻璃效果 */
+    .card { 
+        background: rgba(255, 255, 255, 0.8); 
+        backdrop-filter: blur(10px); 
+        border-radius: 20px; 
+    }
 
-        /* 基础按钮样式 */
-        .option-btn { 
-            transition: all 0.2s; 
-            border: 1px solid #E9EDC9; 
-            /* 关键：去掉手机端点击时的默认高亮颜色 */
-            -webkit-tap-highlight-color: transparent;
-            /* 去掉选中时的外边框 */
-            outline: none !important;
-            /* 防止长按弹出菜单干扰 */
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-        }
+    /* 3. 基础按钮样式：解决手机端残留高亮的问题 */
+    .option-btn { 
+        background-color: #ffffff !important; /* 默认纯白，!important 确保不受 JS 干扰 */
+        transition: all 0.2s; 
+        border: 1px solid #E9EDC9; 
+        -webkit-tap-highlight-color: transparent; /* 移除移动端点击蓝框 */
+        outline: none !important;
+        -webkit-touch-callout: none; /* 禁止长按弹出菜单 */
+        -webkit-user-select: none;   /* 禁止文字选中 */
+    }
 
-        /* 只有在支持鼠标悬停的设备（电脑）上才显示 hover 效果 */
-        @media (hover: hover) {
-            .option-btn:hover { 
-                background-color: #CCD5AE; 
-                transform: translateY(-2px); 
-            }
+    /* 4. 电脑端交互：只有鼠标悬停才变色 */
+    @media (hover: hover) {
+        .option-btn:hover { 
+            background-color: #CCD5AE !important; 
+            transform: translateY(-2px); 
         }
+    }
 
-        /* 手机端点击时的瞬间反馈（按下时变色，松开即消失） */
-        .option-btn:active {
-            background-color: #CCD5AE;
-            transform: scale(0.98);
-        }
+    /* 5. 手机端/点击时交互：按下瞬间变色，松开即消失 */
+    .option-btn:active {
+        background-color: #CCD5AE !important; 
+        transform: scale(0.98);
+        border-color: #CCD5AE;
+    }
 
-        .justify-text { 
-            text-align: justify; 
-            text-justify: inter-character; 
-        }
+    /* 6. 文本对齐 */
+    .justify-text { 
+        text-align: justify; 
+        text-justify: inter-character; 
+    }
 
-        /* 修复支付说明框的样式 */
-        .pay-notice {
-            background-color: #f8fafc;
-            border-radius: 12px;
-            padding: 12px;
-            font-size: 11px;
-            line-height: 1.6;
-            color: #64748b;
-            text-align: left;
-            margin-bottom: 24px;
-        }
-    </style>
+    /* 7. 支付说明框：你刚才加的操作引导 */
+    .pay-notice {
+        background-color: #f8fafc;
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 11px;
+        line-height: 1.6;
+        color: #64748b;
+        text-align: left;
+        margin-bottom: 24px;
+    }
+</style>
 </head>
 <body class="p-4">
 
