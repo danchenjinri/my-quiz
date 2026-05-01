@@ -6,33 +6,82 @@
     <title>元能力拆解测验</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-   <style>
-    /* 1. 基础按钮：默认状态 */
+  <style>
+    /* 1. 整体背景：确保米黄色底色露出来 */
+    body { 
+        background-color: #FAF9F6; 
+        color: #334433; 
+        font-family: -apple-system, "Noto Sans SC", sans-serif; 
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 20px; /* 关键：确保手机端四周能看到背景色 */
+        overscroll-behavior-y: none;
+    }
+
+    /* 2. 毛玻璃卡片：找回最初的通透感 */
+    .card { 
+        background: rgba(255, 255, 255, 0.65); /* 半透明白 */
+        backdrop-filter: blur(15px); 
+        -webkit-backdrop-filter: blur(15px); /* 兼容 iOS 微信 */
+        border-radius: 32px; 
+        padding: 40px 24px;
+        width: 100%;
+        max-width: 380px;
+        /* 增加一条极细的白边，模拟玻璃边缘感 */
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.04);
+        text-align: center;
+    }
+
+    /* 3. 基础按钮：默认状态也要带点透明，才像玻璃上的组件 */
     .option-btn { 
-        background-color: #ffffff !important; 
-        transition: all 0.1s; /* 缩短时间，让反馈更干脆 */
-        border: 1px solid #E9EDC9; 
-        color: #334433;
+        background-color: rgba(255, 255, 255, 0.8) !important; 
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(233, 237, 201, 0.6); 
+        color: #4A5D4A;
         -webkit-tap-highlight-color: transparent;
         outline: none !important;
+        margin-bottom: 12px;
+        cursor: pointer;
     }
 
-    /* 2. 重点：点击时的森林绿反馈 */
-    /* 我们同时针对 active, focus 和 hover 进行设置 */
+    /* 4. 重点：点击时的森林绿反馈 (文字变白) */
     .option-btn:active, 
     .option-btn:focus {
-        background-color: #2D4F1E !important; /* 深森林绿 */
-        color: #ffffff !important;           /* 按下时文字变白，对比更清晰 */
+        background-color: #2D4F1E !important; 
+        color: #ffffff !important;           
         border-color: #2D4F1E !important;
-        transform: scale(0.98);
+        transform: scale(0.97);
+        box-shadow: 0 4px 12px rgba(45, 79, 30, 0.2);
     }
 
-    /* 3. 电脑端悬停效果 */
+    /* 5. 电脑端悬停效果：深一点的森林绿 */
     @media (hover: hover) {
         .option-btn:hover { 
-            background-color: #3B5249 !important; /* 稍浅一点的森林绿 */
+            background-color: #3B5249 !important; 
             color: #ffffff !important;
+            transform: translateY(-2px);
         }
+    }
+
+    /* 辅助样式：让文字更有呼吸感 */
+    #progress {
+        font-size: 11px;
+        letter-spacing: 0.15em;
+        color: #A3AD85;
+        margin-bottom: 16px;
+    }
+
+    #question-text {
+        font-size: 1.2rem;
+        font-weight: 600;
+        line-height: 1.6;
+        margin-bottom: 32px;
+        color: #2D4F1E;
+        text-align: center;
     }
 </style>
 </head>
