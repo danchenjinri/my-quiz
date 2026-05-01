@@ -134,12 +134,24 @@
             document.getElementById('progress').innerText = `${currentStep + 1} / 9`;
             document.getElementById('question-text').innerText = q.t;
             const container = document.getElementById('options-container');
+            
+            // 1. 彻底清空容器，防止旧按钮残留
             container.innerHTML = '';
+            
+            // 2. 每一题开始前，强制页面回到顶部，防止手机端位置错乱
+            window.scrollTo(0, 0);
+
             q.o.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = 'option-btn w-full text-left p-4 rounded-xl text-sm bg-white hover:shadow-md';
+                // 加入了 focus:outline-none 防止手机端选中框残留
+                btn.className = 'option-btn w-full text-left p-4 rounded-xl text-sm bg-white hover:shadow-md focus:outline-none';
                 btn.innerText = opt.l;
-                btn.onclick = () => selectOption(opt.v);
+                
+                // 使用 onclick 并在执行后立刻失焦 (blur)
+                btn.onclick = (e) => {
+                    e.target.blur(); // 重点：点击后立刻让按钮失去焦点
+                    selectOption(opt.v);
+                };
                 container.appendChild(btn);
             });
         }
