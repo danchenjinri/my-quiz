@@ -156,14 +156,39 @@
             });
         }
 
+        // 1. 这一行放在所有函数的外面（建议放在 let currentStep = 0; 下方）
+        let isProcessing = false; 
+
+        // 2. 找到原来的 selectOption 整体替换为这个
         function selectOption(val) {
+            if (isProcessing) return; // 如果正在锁定期，直接返回
+            isProcessing = true; // 开启锁定
+
+            // 物理切断点击：让容器在那一瞬间变灰且不可点
+            const container = document.getElementById('options-container');
+            if(container) {
+                container.style.pointerEvents = 'none';
+                container.style.opacity = '0.7';
+            }
+
             scores[val]++;
             currentStep++;
-            if (currentStep < questions.length) {
-                showQuestion();
-            } else {
-                showResult();
-            }
+
+            // 延迟 350 毫秒再进入下一题并解锁
+            setTimeout(() => {
+                if (currentStep < questions.length) {
+                    showQuestion();
+                    // 恢复点击
+                    if(container) {
+                        container.style.pointerEvents = 'auto';
+                        container.style.opacity = '1';
+                    }
+                    isProcessing = false; // 解锁
+                } else {
+                    showResult();
+                    isProcessing = false;
+                }
+            }, 350); 
         }
 
         function showResult() {
